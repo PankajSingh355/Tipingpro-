@@ -1,0 +1,350 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email == 'pg975674@gmail.com' && request.auth.token.email_verified == true)
+      );
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll([
+        'uid',
+        'displayName',
+        'preferredLanguage',
+        'preferredDurationSec',
+        'leaderboardOptIn',
+        'theme',
+        'deletionRequested',
+        'createdAt',
+        'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'uid',
+        'displayName',
+        'email',
+        'preferredLanguage',
+        'preferredDurationSec',
+        'leaderboardOptIn',
+        'theme',
+        'deletionRequested',
+        'deletionRequestedAt',
+        'createdAt',
+        'updatedAt'
+      ])
+      && data.uid is string
+      && data.uid == userId
+      && isValidId(data.uid)
+      && data.displayName is string
+      && data.displayName.size() >= 1
+      && data.displayName.size() <= 80
+      && (!('email' in data) || (data.email is string && data.email.size() <= 160))
+      && data.preferredLanguage in ['en', 'hi']
+      && data.preferredDurationSec in [60, 120, 180, 300, 600]
+      && data.leaderboardOptIn is bool
+      && data.theme in ['light', 'dark', 'system']
+      && data.deletionRequested is bool
+      && (!('deletionRequestedAt' in data) || (data.deletionRequestedAt is string && data.deletionRequestedAt.size() <= 64))
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidTypingSession(data, userId, sessionId) {
+      return data.keys().hasAll([
+        'id',
+        'userId',
+        'mode',
+        'routeSlug',
+        'language',
+        'difficulty',
+        'durationSec',
+        'elapsedSec',
+        'grossWpm',
+        'netWpm',
+        'accuracy',
+        'correctChars',
+        'incorrectChars',
+        'totalTypedChars',
+        'passageTitle',
+        'createdAt'
+      ])
+      && data.keys().hasOnly([
+        'id',
+        'userId',
+        'mode',
+        'routeSlug',
+        'language',
+        'difficulty',
+        'durationSec',
+        'elapsedSec',
+        'grossWpm',
+        'netWpm',
+        'accuracy',
+        'correctChars',
+        'incorrectChars',
+        'totalTypedChars',
+        'passageTitle',
+        'createdAt'
+      ])
+      && data.id is string
+      && data.id == sessionId
+      && isValidId(data.id)
+      && data.userId is string
+      && data.userId == userId
+      && data.mode in ['test', 'practice', 'lesson', 'game']
+      && data.routeSlug is string
+      && data.routeSlug.size() >= 1
+      && data.routeSlug.size() <= 100
+      && data.language in ['en', 'hi']
+      && data.difficulty in ['beginner', 'intermediate', 'advanced', 'custom']
+      && data.durationSec is number && data.durationSec >= 15 && data.durationSec <= 3600
+      && data.elapsedSec is number && data.elapsedSec >= 1 && data.elapsedSec <= 3600
+      && data.grossWpm is number && data.grossWpm >= 0 && data.grossWpm <= 300
+      && data.netWpm is number && data.netWpm >= 0 && data.netWpm <= 300
+      && data.accuracy is number && data.accuracy >= 0 && data.accuracy <= 100
+      && data.correctChars is number && data.correctChars >= 0 && data.correctChars <= 100000
+      && data.incorrectChars is number && data.incorrectChars >= 0 && data.incorrectChars <= 100000
+      && data.totalTypedChars is number && data.totalTypedChars >= 0 && data.totalTypedChars <= 100000
+      && data.passageTitle is string && data.passageTitle.size() >= 1 && data.passageTitle.size() <= 120
+      && data.createdAt is timestamp;
+    }
+
+    function isValidLeaderboardEntry(data, entryId) {
+      return data.keys().hasAll([
+        'id',
+        'userId',
+        'displayName',
+        'language',
+        'durationSec',
+        'netWpm',
+        'grossWpm',
+        'accuracy',
+        'verificationDigest',
+        'createdAt',
+        'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'id',
+        'userId',
+        'displayName',
+        'language',
+        'durationSec',
+        'netWpm',
+        'grossWpm',
+        'accuracy',
+        'verificationDigest',
+        'createdAt',
+        'updatedAt'
+      ])
+      && data.id is string
+      && data.id == entryId
+      && isValidId(data.id)
+      && data.userId is string
+      && isValidId(data.userId)
+      && data.displayName is string
+      && data.displayName.size() >= 1
+      && data.displayName.size() <= 60
+      && data.language in ['en', 'hi']
+      && data.durationSec in [60, 120, 180, 300, 600]
+      && data.netWpm is number && data.netWpm >= 5 && data.netWpm <= 220
+      && data.grossWpm is number && data.grossWpm >= data.netWpm && data.grossWpm <= 250
+      && data.accuracy is number && data.accuracy >= 80 && data.accuracy <= 100
+      && data.verificationDigest is string
+      && data.verificationDigest.size() == 64
+      && data.verificationDigest.matches('^[a-f0-9]+$')
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    function isValidContactMessage(data, messageId) {
+      return data.keys().hasAll(['id', 'name', 'email', 'topic', 'message', 'createdAt'])
+      && data.keys().hasOnly(['id', 'name', 'email', 'topic', 'message', 'createdAt'])
+      && data.id is string
+      && data.id == messageId
+      && isValidId(data.id)
+      && data.name is string && data.name.size() >= 2 && data.name.size() <= 80
+      && data.email is string && data.email.size() >= 5 && data.email.size() <= 160
+      && data.topic in ['general', 'bug', 'feedback', 'privacy', 'domain']
+      && data.message is string && data.message.size() >= 10 && data.message.size() <= 2000
+      && data.createdAt is timestamp;
+    }
+
+    function isValidBlogArticle(data, articleId) {
+      return data.keys().hasAll([
+        'id',
+        'slug',
+        'title',
+        'excerpt',
+        'category',
+        'content',
+        'authorName',
+        'readMinutes',
+        'status',
+        'createdAt',
+        'updatedAt'
+      ])
+      && data.keys().hasOnly([
+        'id',
+        'slug',
+        'title',
+        'excerpt',
+        'category',
+        'content',
+        'authorName',
+        'readMinutes',
+        'status',
+        'createdAt',
+        'updatedAt'
+      ])
+      && data.id is string && data.id == articleId && isValidId(data.id)
+      && data.slug is string && data.slug.size() >= 3 && data.slug.size() <= 120 && data.slug.matches('^[a-z0-9\\-]+$')
+      && data.title is string && data.title.size() >= 10 && data.title.size() <= 140
+      && data.excerpt is string && data.excerpt.size() >= 20 && data.excerpt.size() <= 320
+      && data.category in [
+        'Typing Tips',
+        'English Typing',
+        'Hindi Typing',
+        'Typing Speed',
+        'Student Guides',
+        'Exam Preparation'
+      ]
+      && data.content is string && data.content.size() >= 100 && data.content.size() <= 25000
+      && data.authorName is string && data.authorName.size() >= 2 && data.authorName.size() <= 60
+      && data.readMinutes is number && data.readMinutes >= 1 && data.readMinutes <= 60
+      && data.status in ['draft', 'published']
+      && data.createdAt is timestamp
+      && data.updatedAt is timestamp;
+    }
+
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserProfile(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(userId)
+        && (isOwner(userId) || isAdmin())
+        && isValidUserProfile(incoming(), userId)
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'displayName',
+          'email',
+          'preferredLanguage',
+          'preferredDurationSec',
+          'leaderboardOptIn',
+          'theme',
+          'deletionRequested',
+          'deletionRequestedAt',
+          'updatedAt'
+        ]);
+      allow delete: if isValidId(userId) && (isOwner(userId) || isAdmin());
+
+      match /sessions/{sessionId} {
+        allow get: if isValidId(userId) && isValidId(sessionId) && (isOwner(userId) || isAdmin());
+        allow list: if isValidId(userId) && (isOwner(userId) || isAdmin()) && existing().userId == userId;
+        allow create: if isValidId(userId)
+          && isValidId(sessionId)
+          && isOwner(userId)
+          && isValidTypingSession(incoming(), userId, sessionId)
+          && incoming().createdAt == request.time
+          && exists(/databases/$(database)/documents/users/$(userId));
+        allow update: if false;
+        allow delete: if isValidId(userId) && isValidId(sessionId) && (isOwner(userId) || isAdmin());
+      }
+    }
+
+    match /leaderboard/{entryId} {
+      allow get: if isValidId(entryId);
+      allow list: if existing().netWpm >= 5;
+      allow create: if isValidId(entryId)
+        && isSignedIn()
+        && isValidLeaderboardEntry(incoming(), entryId)
+        && incoming().userId == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+      allow update: if isValidId(entryId)
+        && isSignedIn()
+        && isValidLeaderboardEntry(incoming(), entryId)
+        && existing().userId == request.auth.uid
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'displayName',
+          'netWpm',
+          'grossWpm',
+          'accuracy',
+          'verificationDigest',
+          'updatedAt'
+        ]);
+      allow delete: if isValidId(entryId) && ((isSignedIn() && existing().userId == request.auth.uid) || isAdmin());
+    }
+
+    match /contactMessages/{messageId} {
+      allow get, list: if isAdmin();
+      allow create: if isValidId(messageId)
+        && isValidContactMessage(incoming(), messageId)
+        && incoming().createdAt == request.time;
+      allow update, delete: if isAdmin();
+    }
+
+    match /blogArticles/{articleId} {
+      allow get: if isValidId(articleId) && (existing().status == 'published' || isAdmin());
+      allow list: if existing().status == 'published' || isAdmin();
+      allow create: if isValidId(articleId)
+        && isAdmin()
+        && isValidBlogArticle(incoming(), articleId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(articleId)
+        && isAdmin()
+        && isValidBlogArticle(incoming(), articleId)
+        && incoming().id == existing().id
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'slug',
+          'title',
+          'excerpt',
+          'category',
+          'content',
+          'authorName',
+          'readMinutes',
+          'status',
+          'updatedAt'
+        ]);
+      allow delete: if isValidId(articleId) && isAdmin();
+    }
+  }
+}

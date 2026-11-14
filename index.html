@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TypingPro – Free Online English &amp; Hindi Typing Speed Test</title>
+    <meta
+      name="description"
+      content="Improve your typing speed and accuracy with TypingPro. Take free 1, 2, 3, 5, and 10-minute English and Hindi Devanagari typing tests, lessons, and games."
+    />
+    <meta property="og:title" content="TypingPro – Free Online English &amp; Hindi Typing Speed Test" />
+    <meta
+      property="og:description"
+      content="Improve your typing speed and accuracy with TypingPro. Free English and Hindi typing tests, lessons, games, and progress tracking."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TypingPro" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TypingPro – Free Online English &amp; Hindi Typing Speed Test" />
+    <meta
+      name="twitter:description"
+      content="Practice English and Hindi Unicode typing online with real-time WPM, accuracy metrics, guided lessons, and typing games."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('typingpro_theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased selection:bg-blue-600/20 selection:text-blue-900 dark:selection:bg-blue-400/30 dark:selection:text-blue-100">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

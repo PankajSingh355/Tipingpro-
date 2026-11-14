@@ -1,0 +1,364 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Private user account profile and typing preferences",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID of the user"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "User display name"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 160,
+          "description": "User email address (private to owner)"
+        },
+        "preferredLanguage": {
+          "type": "string",
+          "enum": ["en", "hi"],
+          "description": "Preferred typing language"
+        },
+        "preferredDurationSec": {
+          "type": "number",
+          "description": "Default test duration in seconds"
+        },
+        "leaderboardOptIn": {
+          "type": "boolean",
+          "description": "Whether user opts into public leaderboard display"
+        },
+        "theme": {
+          "type": "string",
+          "enum": ["light", "dark", "system"],
+          "description": "UI color theme preference"
+        },
+        "deletionRequested": {
+          "type": "boolean",
+          "description": "Whether the user requested account/data deletion"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of profile creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last profile update"
+        }
+      },
+      "required": [
+        "uid",
+        "displayName",
+        "preferredLanguage",
+        "preferredDurationSec",
+        "leaderboardOptIn",
+        "theme",
+        "deletionRequested",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "TypingSession": {
+      "title": "TypingSession",
+      "description": "Completed typing test, practice, lesson, or game session saved by a user",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "userId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["test", "practice", "lesson", "game"]
+        },
+        "routeSlug": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "language": {
+          "type": "string",
+          "enum": ["en", "hi"]
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced", "custom"]
+        },
+        "durationSec": {
+          "type": "number"
+        },
+        "elapsedSec": {
+          "type": "number"
+        },
+        "grossWpm": {
+          "type": "number"
+        },
+        "netWpm": {
+          "type": "number"
+        },
+        "accuracy": {
+          "type": "number"
+        },
+        "correctChars": {
+          "type": "number"
+        },
+        "incorrectChars": {
+          "type": "number"
+        },
+        "totalTypedChars": {
+          "type": "number"
+        },
+        "passageTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "mode",
+        "routeSlug",
+        "language",
+        "difficulty",
+        "durationSec",
+        "elapsedSec",
+        "grossWpm",
+        "netWpm",
+        "accuracy",
+        "correctChars",
+        "incorrectChars",
+        "totalTypedChars",
+        "passageTitle",
+        "createdAt"
+      ]
+    },
+    "LeaderboardEntry": {
+      "title": "LeaderboardEntry",
+      "description": "Publicly visible high score verified by server telemetry check, containing zero PII",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "userId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "language": {
+          "type": "string",
+          "enum": ["en", "hi"]
+        },
+        "durationSec": {
+          "type": "number"
+        },
+        "netWpm": {
+          "type": "number"
+        },
+        "grossWpm": {
+          "type": "number"
+        },
+        "accuracy": {
+          "type": "number"
+        },
+        "verificationDigest": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64,
+          "pattern": "^[a-f0-9]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "displayName",
+        "language",
+        "durationSec",
+        "netWpm",
+        "grossWpm",
+        "accuracy",
+        "verificationDigest",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ContactMessage": {
+      "title": "ContactMessage",
+      "description": "Contact form submission from visitors or registered users",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 160
+        },
+        "topic": {
+          "type": "string",
+          "enum": ["general", "bug", "feedback", "privacy", "domain"]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 2000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "name", "email", "topic", "message", "createdAt"]
+    },
+    "BlogArticle": {
+      "title": "BlogArticle",
+      "description": "Editorial typing guide or article managed by site admin",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "slug": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120,
+          "pattern": "^[a-z0-9\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 140
+        },
+        "excerpt": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 320
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "Typing Tips",
+            "English Typing",
+            "Hindi Typing",
+            "Typing Speed",
+            "Student Guides",
+            "Exam Preparation"
+          ]
+        },
+        "content": {
+          "type": "string",
+          "minLength": 100,
+          "maxLength": 25000
+        },
+        "authorName": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "readMinutes": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "published"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "title",
+        "excerpt",
+        "category",
+        "content",
+        "authorName",
+        "readMinutes",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private user profile and preferences"
+    },
+    "/users/{userId}/sessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/TypingSession" },
+      "description": "Private typing test and practice session history for the owning user"
+    },
+    "/leaderboard/{entryId}": {
+      "schema": { "$ref": "#/entities/LeaderboardEntry" },
+      "description": "Public validated leaderboard entries without PII"
+    },
+    "/contactMessages/{messageId}": {
+      "schema": { "$ref": "#/entities/ContactMessage" },
+      "description": "Visitor and user contact inquiries"
+    },
+    "/blogArticles/{articleId}": {
+      "schema": { "$ref": "#/entities/BlogArticle" },
+      "description": "Admin-curated typing guides and blog posts"
+    }
+  }
+}

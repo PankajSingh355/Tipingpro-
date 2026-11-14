@@ -1,0 +1,6 @@
+{
+  "name": "TypingPro",
+  "description": "Free online English and Hindi typing test, typing speed practice, touch typing lessons, typing games, and progress analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
